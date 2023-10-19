@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HideAndSeek</title><!--hide-and-seek-->
+    <script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+    <table>
+        <tr>
+            <td>
+                <canvas id="canvas"></canvas>
+            </td>
+            <td>
+                <table>
+                    <tr>
+                        <td>
+                            <div style="font-size: 30px;">ТАЙМЕР ВЫБОРА ВОДЫ</div>
+                            <div id="timer" style="border: 3px solid rgb(0, 0, 0);"  ></div>
+                            <br>
+                            <br>
+                            <br>
+                            <br>
+                            <br>
+                            <div style="font-size: 30px;">ТАЙМЕР ПРЯТОК</div>
+                            <div id="timer_hide" style="border: 3px solid rgb(0, 0, 0); " ></div>
+                            <br>
+                            <br>
+                            <br>
+                            <br>
+                            <div style="font-size: 30px;">ТАЙМЕР ИГРЫ</div>
+                            <div id="timer_game" style="border: 3px solid rgb(0, 0, 0); " ></div>
+                            <br>
+                            <br>
+                            <br>
+                            <br>
+                            <br>
+                            <br>
+                            <br>
+                            <br>
+                            <br>
+                            <button id="start_game" class="hider-recipient">START</button>
+                            <br>
+                            <br>
+                            <br>
+                            <br>
+                            <br>
+                            <br>
+                            <div style="font-size: 30px; text-align: center; display: inline-block;">Победил:</div> 
+                            <div id="winner">x</div>
+
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <br>
+                            <br>
+                            <br>
+                            <br>
+                            <br>
+                            <br>
+                            <div style="font-size: 30px; text-align: center; display: inline-block;">Смотрят:</div> 
+                            <div id="watcher">x</div>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+    <div style="font-size: 30px;">W - вверх, A - влево, S - вниз, D - вправо, L - осалить</div>
+    
+</body>
+<script src="../static/drawPlayer.js"></script>
+<script src="../static/game.js"></script>
+<script src="../static/move.js"></script>
+</html>
