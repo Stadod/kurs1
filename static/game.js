@@ -17,8 +17,6 @@ var game_started = false;
 var count_players;
 var visibles = false;
 
-var hide_field = false;
-
 //ввод имени
 while (_name === "" || _name === null || _name.length > 15){
     _name = prompt("Введите имя (до 15 символов)");
@@ -37,12 +35,6 @@ timer.style.width = "150px";
 timer.style.height = "30px";
 timer.style.fontSize = "30px";
 timer.style.textAlign = "center";
-
-const timer_hide = document.getElementById("timer_hide");
-timer_hide.style.width = "150px";
-timer_hide.style.height = "30px";
-timer_hide.style.fontSize = "30px";
-timer_hide.style.textAlign = "center";
 
 const timer_game = document.getElementById("timer_game");
 timer_game.style.width = "150px";
@@ -78,12 +70,6 @@ socket.on("timer_started", () => {
     game_started = true;
 })
 
-//вода прячеться
-socket.on("timer_hide_stoped", () => {
-    let count = 2;
-    socket.emit("start_hide", count); 
-})
-
 //вода спрятался
 socket.on("timer_stoped", () => {
     let count = 60;
@@ -103,10 +89,6 @@ socket.on("timer", (time) => {
     timer.textContent = time;
 });
 
-//таймер пряток
-socket.on("timer_hide", (time) => {
-    timer_hide.textContent = time;
-});
 
 //таймер самой игры
 socket.on("timer_game", (time) => {
@@ -122,13 +104,14 @@ socket.on("drawedBlocks", (array) => {
     array_blocks = array;
 })
 
+
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //обновление состояния игры
 
 socket.on("state", (players) => {
 
     /////////////////////////////////////////////////////////////////////////////////////////////////
-    //скрывает поля когда прячестя игрок
     
     //отрисовка фона
 
@@ -138,14 +121,15 @@ socket.on("state", (players) => {
     //context.fillStyle = "rgb(240, 247, 21)";
 
     //отрисовка препятствий
+    for(j = 0; j < array_blocks.length; j++){
         context.fillRect(array_blocks[j][0] ,array_blocks[j][1], array_blocks[j][2], array_blocks[j][3]);
             c1 = array_blocks[j][4]
             c2 = array_blocks[j][5]
             c3 = array_blocks[j][6]
             c4 = array_blocks[j][7]
-            context.fillStyle = "rgb("+c1+","+c2+","+c3+","+c4+")";
+            context.fillStyle = "rgb("+c1+","+c2+","+c3+","+c4+")";}
     context.closePath();
-})
+
     /////////////////////////////////////////////////////////////////////////////////////////////////
 
     //массив айдишников
@@ -158,6 +142,15 @@ socket.on("state", (players) => {
 
     let count_visibles = 0;
     let visible_id;
+
+    //отрисовка клонов воды
+    for (k=0;k<players_limit;k++) {
+        const player = players[array_id[k]];
+        if(player?._hide == true){
+            drawClone(context, player)
+        } 
+    }
+    
 
 
     //запоминаем "видимых" игроков
@@ -176,7 +169,7 @@ socket.on("state", (players) => {
 
     }
 
-    //отрисовка игроков (не больше установленного лимита (сейчас = 3))
+    //отрисовка игроков (не больше установленного лимита (сейчас = 2))
     if(Object.keys(players).length > players_limit){
         for (i=0;i<players_limit;i++) {
             const player = players[array_id[i]];

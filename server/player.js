@@ -10,8 +10,7 @@ class Player {
         this._name = props.name;
         this._id = props.id;
         this._playerRadius = 30;
-        this._hide = false;
-
+        this._space = false;
         
         this.x1 = Math.floor(Math.random()* (280) + 20);
         this.y1 = Math.floor(Math.random()* (280) + 20);
@@ -20,7 +19,7 @@ class Player {
         this.c3 = Math.floor(Math.random()* (205) + 50);
         this.c4 = Math.random()
 
-        this._block_side;
+        this._hide = false;
         this._visible = true;
 
         this.positionX = 50;//Math.floor(Math.random()* 1610);// (max - min) + min 300;
@@ -53,7 +52,7 @@ module.exports.getPlayers = (socket) => {
         if(move.down && player.positionY < WINDOW_HIGHT){
             player.positionY += speed;
         }
-
+        player._space = move.space;
     })
 
     socket.on("disconnect", () => {

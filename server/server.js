@@ -22,6 +22,8 @@ app.get("/", (request, response) => {
 
 //массив блоков
 var array_blocks = [];
+var posX = [];
+var posY = [];
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 server.listen(5000, () => {
@@ -47,13 +49,30 @@ server.listen(5000, () => {
     
            array_blocks.push([x0, y0, x1, y1, c1, c2, c3, c4]);
     }
-    /////////////////////////////////////////////////////////////////////////////////////////////////
 
     //отправка клиенту массива с данными о блоках
     setInterval(() => {
         io.sockets.emit("drawedBlocks", array_blocks);
     }, 1000 )
 
+    for(i=0; i < 5; i++){
+        let x = Math.floor(Math.random()* ((1610 - 60)));
+        let y = Math.floor(Math.random()* ((920 - 60)));
+        
+           posX.push([x]);
+           posY.push([y]);
+    }
+
+    //отправка клиенту массива с данными о блоках
+    setInterval(() => {
+        io.sockets.emit("position_blockX", posX);
+    }, 1000 )
+
+    //отправка клиенту массива с данными о блоках
+    setInterval(() => {
+        io.sockets.emit("position_blockY", posY);
+    }, 1000 )
+    
 });
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -61,9 +80,6 @@ server.listen(5000, () => {
 var timer;
 var done = true;
 
-//таймер пряток
-var timer_hide;
-var done_timer_hide = true;
 
 //таймер поиска
 var timer_game;
@@ -87,26 +103,8 @@ io.on("connection", (socket) => {
             if(count>0) count--;
             else {
                 clearInterval(intervalId);//когда таймер закончится, перестать его выполнять
-                io.sockets.emit("timer_hide_stoped");
-                done = false;
-            }
-        }, 1000)
-    })
-    /////////////////////////////////////////////////////////////////////////////////////////////////
-
-    
-    /////////////////////////////////////////////////////////////////////////////////////////////////
-    //начинается таймер пряток воды
-    socket.on("start_hide", (count) => {
-        io.sockets.emit("timer_hide_started");
-        const intervalId = setInterval(() => {
-            timer_hide = count;
-            io.sockets.emit("timer_hide", count);
-            if(count>0) count--;
-            else {
-                clearInterval(intervalId);//когда таймер закончится, перестать его выполнять
                 io.sockets.emit("timer_stoped");
-                done_timer_hide = false;
+                done = false;
             }
         }, 1000)
     })
@@ -128,13 +126,12 @@ io.on("connection", (socket) => {
         }, 1000)
     })
     /////////////////////////////////////////////////////////////////////////////////////////////////
-
-});
+})
 
 //функция "осаливания"........................................................................................................
-function hide(player_hide, player_seek){
-    player_hide._hide = true;
-    player_seek._hide = false;
+function hide(player_hide){
+    player_hide._visible = false;
+    done_game_timer = true
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -162,17 +159,17 @@ const gameLoop = (players, io) => {
 
             //проверка, чтоб не тыкал сам на себя
             if(player_1?._id != player_2?._id){
-                if(    player_1?.positionX > (player_2?.positionX - 55)//? - чтоб не вылазила ошибка при undefined 
-                && player_1?.positionX < (player_2?.positionX + 55) 
-                && player_1?.positionY < (player_2?.positionY + 55) 
-                && player_1?.positionY > player_2?.positionY - 55 
+                if(    player_1?.positionX > (player_2?.positionX)//? - чтоб не вылазила ошибка при undefined 
+                && player_1?.positionX < (player_2?.positionX + player_2?.x1) 
+                && player_1?.positionY < (player_2?.positionY + player_2?.y1) 
+                && player_1?.positionY > player_2?.positionY 
                 && player_1?._visible == true && player_2?._visible)
                 {
                     if(player_1?._space == true || player_2?._space == true){
-                        if(player_1?._space == true && player_1?._hide == true){
-                            hide(player_2, player_1);
-                        }else if(player_2?._space == true && player_2?._hide == true){
-                            hide(player_1, player_2);
+                        if(player_1?._space == true && player_1?._hide == false){
+                            hide(player_2);
+                        }else if(player_2?._space == true && player_2?._hide == false){
+                            hide(player_1);
                         }
                     }
                 }
@@ -193,42 +190,34 @@ const gameLoop = (players, io) => {
 
     //срабатывание таймера воды
     if(timer == 0 && !done){
-        var hide_field
         let random = Math.round(Math.random()*(array_visible.length - 1));//к ближайшему целому
         players[array_visible[random]]._hide = true;
-        done = true;
-        for (const id in players) {
-            if(players[id]._hide == false){
-                if(players[id]._visible){
-                    io.to(id).emit('hide_field', ()=>{
-                        hide_field = true 
-                    })
-                }
-            }
-        }
-        
-            
-    }
+        done = true;     
 
-    if(timer_hide == 0 && !done_timer_hide){
+        for (i=0;i<players_limit;i++) {
+            const player = players[array_id[i]];
+            if(player?._visible){
+                count_visibles++;
+                visible_id = array_id[i];
+            } 
+        }
         for (const id in players) {
-            if(players[id]._hide == false){
-                if(players[id]._visible){
-                    io.to(id).emit('hide_field', ()=>{
-                        hide_field = false 
-                    })
-                }
+            const player = players[id];
+            if(player._hide == true){
+                player.positionX = Math.floor(Math.random()* ((1610 - 60)));;
+                player.positionY = Math.floor(Math.random()* ((920 - 60)));
             }
         }
-        done_timer_hide = true;
+    
     }
 
     //срабатывание таймера игры
-    if(timer_game == 0 && !done_game_timer){
-        
+    if(timer_game == 0 && !done_game_timer){    
+
+
         for (const id in players) {
             const player = players[id];
-            if(player._hide == true && array_visible.length != 1){
+            if(player._hide == false && array_visible.length != 1){
                 player._visible = false;
             }else{
                 player._hide = false;
