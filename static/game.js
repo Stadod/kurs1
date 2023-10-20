@@ -129,17 +129,7 @@ socket.on("state", (players) => {
 
     /////////////////////////////////////////////////////////////////////////////////////////////////
     //скрывает поля когда прячестя игрок
-    let c1
-    let c2
-    let c3
-    let c4
-    socket.on("hide_field",(hide_field)=>{
-        if(hide_field == true){
-            c1 = 150
-            c2 = 150
-            c3 = 150
-            c4 = 1
-        }
+    
     //отрисовка фона
 
     context.beginPath();
@@ -148,14 +138,12 @@ socket.on("state", (players) => {
     //context.fillStyle = "rgb(240, 247, 21)";
 
     //отрисовка препятствий
-    for(j = 0; j < array_blocks.length; j++){
         context.fillRect(array_blocks[j][0] ,array_blocks[j][1], array_blocks[j][2], array_blocks[j][3]);
-        if (hide_field == false){
             c1 = array_blocks[j][4]
             c2 = array_blocks[j][5]
             c3 = array_blocks[j][6]
             c4 = array_blocks[j][7]
-            context.fillStyle = "rgb("+c1+","+c2+","+c3+","+c4+")";}}
+            context.fillStyle = "rgb("+c1+","+c2+","+c3+","+c4+")";
     context.closePath();
 })
     /////////////////////////////////////////////////////////////////////////////////////////////////
