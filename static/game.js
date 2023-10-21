@@ -16,6 +16,7 @@ var players_limit = 2;
 var game_started = false;
 var count_players;
 var visibles = false;
+var newClone = false;
 
 //ввод имени
 while (_name === "" || _name === null || _name.length > 15){
@@ -60,7 +61,7 @@ winner.style.display ="inline-block";
 
 //по кнопке начинается игра (стартует таймер выбора воды)
 start_game.addEventListener('click', () => {
-        let count = 1;
+        let count = 5;
         socket.emit("start_game", count);
 })
 
@@ -72,7 +73,7 @@ socket.on("timer_started", () => {
 
 //вода спрятался
 socket.on("timer_stoped", () => {
-    let count = 60;
+    let count = 15;
     socket.emit("timer_game_start", count); 
 })
 
@@ -144,11 +145,21 @@ socket.on("state", (players) => {
     let visible_id;
 
     //отрисовка клонов воды
+    function drawCloneP(){
     for (k=0;k<players_limit;k++) {
         const player = players[array_id[k]];
         if(player?._hide == true){
             drawClone(context, player)
         } 
+    }}
+    drawCloneP();
+
+    socket.on("newClone", (newClones) => {
+        newClone = newClones;
+    });
+    if(newClone == true){
+        drawCloneP();
+        newClone = false;
     }
     
 

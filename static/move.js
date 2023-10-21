@@ -4,6 +4,8 @@ const movement = {
     left: false,
     right: false,
     space: false,
+    action: false,
+    prison: false,
 }
 
 document.addEventListener("keydown", (event) => {
@@ -23,6 +25,12 @@ document.addEventListener("keydown", (event) => {
         case 76: //space
             movement.space = true;
             break;
+        case 69: //action
+            movement.action = true;
+            break;
+        case 81: //prison
+            movement.prison = true;
+            break;
     }
 });
 
@@ -40,8 +48,14 @@ document.addEventListener("keyup", (event) => {
         case 83: //S
             movement.down = false;
             break;
-        case 76: //L (отдать картошку)
+        case 76: //L (осалить)
             movement.space = false;
+            break;
+        case 69: //action
+            movement.action = false;
+            break;
+        case 81: //prison
+            movement.prison = false;
             break;
     }
 });

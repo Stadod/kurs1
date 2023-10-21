@@ -3,7 +3,7 @@ const http = require("http");
 const path = require("path");
 const socketIO = require("socket.io");
 
-const getPlayers = require("./player").getPlayers;
+const getPlayers = require("./Player").getPlayers;
 
 const app = express();
 const server = http.Server(app);
@@ -24,6 +24,17 @@ app.get("/", (request, response) => {
 var array_blocks = [];
 var posX = [];
 var posY = [];
+
+function clonePosition(){
+    for(i=0; i < 5; i++){
+        let x = Math.floor(Math.random()* ((1610 - 60)));
+        let y = Math.floor(Math.random()* ((920 - 60)));
+        
+           posX[i] = x;
+           posY[i] = y;
+    }}
+    
+    clonePosition();
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 server.listen(5000, () => {
@@ -54,14 +65,7 @@ server.listen(5000, () => {
     setInterval(() => {
         io.sockets.emit("drawedBlocks", array_blocks);
     }, 1000 )
-
-    for(i=0; i < 5; i++){
-        let x = Math.floor(Math.random()* ((1610 - 60)));
-        let y = Math.floor(Math.random()* ((920 - 60)));
-        
-           posX.push([x]);
-           posY.push([y]);
-    }
+    
 
     //отправка клиенту массива с данными о блоках
     setInterval(() => {
@@ -75,6 +79,8 @@ server.listen(5000, () => {
     
 });
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+var bcolor = false;
 
 //таймер выбора воды
 var timer;
@@ -133,8 +139,30 @@ function hide(player_hide){
     player_hide._visible = false;
     done_game_timer = true
 }
+//функция перекраски
+function recolor(playerc){
+    var r = 5;
+    var nc1 = playerc.c1 = Math.floor(Math.random()* (205) + 50);
+    var nc2 = playerc.c2 = Math.floor(Math.random()* (205) + 50);
+    var nc3 = playerc.c3 = Math.floor(Math.random()* (205) + 50);
+    var nc4 = playerc.c4 = Math.random()
+    io.sockets.emit("newPlayerColor1", nc1);
+    io.sockets.emit("newPlayerColor2", nc2);
+    io.sockets.emit("newPlayerColor3", nc3);
+    io.sockets.emit("newPlayerColor4", nc4);
+    io.sockets.emit("r", r);
+}
+//функция замены клонов и прячищевося
+function newCloneAPlay(player_h){
+    clonePosition();
+    var newClones = true;
+    io.sockets.emit("newClone",newClones);
+    player_h.positionX = Math.floor(Math.random()* ((1610 - 60)));;
+    player_h.positionY = Math.floor(Math.random()* ((920 - 60)));
+    recolor(player_h);
+}
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////sd//////////////////////////////////////////////////////////////////////////////////////////////
 //состояние игры
 const gameLoop = (players, io) => {
 
@@ -178,6 +206,29 @@ const gameLoop = (players, io) => {
         }
     }
 
+    for (const id_1 in players_1) {
+        const player_1 = players_1[id_1];
+
+        for (const id_2 in players_2) {
+            const player_2 = players_2[id_2];
+                        if(bcolor){
+                            /////тот кто ищет
+                        if(player_1?._hide != true && player_1?._action == true && player_1?._prison == false){
+                            recolor(player_2);
+                        }else if(player_2?._hide != true && player_2?._action == true && player_2?._prison == false){
+                            recolor(player_1);
+                        }
+                        ////тот кто прячеться
+                        else if(player_1?._hide != false && player_1?._action == true && player_2?._prison == false){
+                            newCloneAPlay(player_1);
+                        }
+                        else if (player_2?._hide != false && player_2?._action == true && player_1?._prison == false){
+                            newCloneAPlay(player_2);
+                        }
+                    }
+        }
+    }
+
     //создаём массив оставшихся (видимых) игроков
     let array_visible = [];
         let j = 0;
@@ -193,6 +244,7 @@ const gameLoop = (players, io) => {
         let random = Math.round(Math.random()*(array_visible.length - 1));//к ближайшему целому
         players[array_visible[random]]._hide = true;
         done = true;     
+        bcolor = true;
 
         for (i=0;i<players_limit;i++) {
             const player = players[array_id[i]];
@@ -213,7 +265,7 @@ const gameLoop = (players, io) => {
 
     //срабатывание таймера игры
     if(timer_game == 0 && !done_game_timer){    
-
+        bcolor = false;
 
         for (const id in players) {
             const player = players[id];

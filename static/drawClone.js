@@ -1,22 +1,15 @@
 var posX = [];
 var posY = [];
-socket.on("position_blockX", (array) => {
-posX = array;
+socket.on("position_blockX", (arrayx) => {
+posX = arrayx;
 });
-socket.on("position_blockY", (array) => {
-posY = array
+socket.on("position_blockY", (arrayy) => {
+posY = arrayy
 });
-
-socket.on("Pposition_blockX", (array) => {
-    posX = array;
-    });
-    socket.on("Pposition_blockY", (array) => {
-    posY = array
-    });
     
 
 const drawClone = (context, player) => {
-    for(i=0; i < 5; i++){
+    for(i=0; i < 8; i++){
     
     // console.log(player.c1)
     // console.log(player.c2)
